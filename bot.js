@@ -110,7 +110,8 @@ client.on('interactionCreate', async interaction => {
     const titre = interaction.options.getString('titre');
     const max   = interaction.options.getInteger('joueurs');
     const data = { titre, max, participants: [], refus: [], attente: [] };
-    const msg = await interaction.reply({ ...buildSondage(data), fetchReply: true });
+   await interaction.channel.send('@everyone 🎮 Un nouveau sondage vient d\'être créé !');
+const msg = await interaction.reply({ ...buildSondage(data), fetchReply: true });
     sondages.set(msg.id, data);
     return;
   }
