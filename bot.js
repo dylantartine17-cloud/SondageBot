@@ -132,13 +132,16 @@ client.on('interactionCreate', async interaction => {
     await new Promise(r => setTimeout(r, 1500));
 
     const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
-    const messages = [
-  `🎉 **La roue s'arrête sur... ${gagnant} !** 🎉\n\n*Bonne chance pour la partie !*`,
-  `🎯 **${gagnant} est désigné(e) !** 🎯\n\n*Le destin a parlé !*`,
-  `👑 **${gagnant} est choisi(e) !** 👑\n\n*Montre ce que tu sais faire !*`,
-  `🔥 **C'est ${gagnant} !** 🔥\n\n*À toi de jouer !*`,
-  `⚡ **La roue a choisi ${gagnant} !** ⚡\n\n*Pas de pitié !*`,
-  `🎮 **${gagnant} est sélectionné(e) !** 🎮\n\n*GG à l'avance !*`,
+   const messages = [
+  `🔪 **${gagnant} est désigné(e) !** 🔪\n\n*L'Entité a parlé... bonne chance pour survivre !*`,
+`😈 **${gagnant} sera le Killer !** 😈\n\n*Montre leur qui est le vrai monstre dans cette partie !*`,
+     `💀 **L'Entité désigne ${gagnant} !** 💀\n\n*Personne ne sort vivant du Royaume de l'Entité !*`,
+       `👁️ **L'œil de l'Entité choisit ${gagnant} !** 👁️\n\n*Tu ne peux pas échapper à ton destin !*`,
+     `🎭 **${gagnant} est choisi(e) par l'Entité !** 🎭\n\n*Dead by Daylight... ou Dead by ${gagnant} ?*`,
+     `🔪 **${gagnant} joue le Tueur ce soir !** 🔪\n\n*L'Entité t'a choisi... les survivants ne savent pas encore ce qui les attend !*`,
+      `😤 **${gagnant} est le Killer !** 😤\n\n*4K ou rien, l'honneur du Killer est en jeu !*`,
+     `🩸 **${gagnant} part en Tueur !** 🩸\n\n*Tunnelle, campe, slug... fais ce qu'il faut !*`,
+     `🎯 **${gagnant} est choisi(e) !** 🎯\n\n*Ce soir tu es le prédateur, eux sont ta proie !*`,
 ];
 const messageAleatoire = messages[Math.floor(Math.random() * messages.length)];
 await interaction.editReply({ content: messageAleatoire });
