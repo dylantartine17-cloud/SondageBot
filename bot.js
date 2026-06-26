@@ -151,10 +151,14 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName !== 'roue') return;
 
-  const joueurs = ['joueur1','joueur2','joueur3','joueur4','joueur5']
-    .map(k => interaction.options.getUser(k))
-    .filter(u => u !== null)
-    .map(u => `<@${u.id}>`);
+ const joueurs = [];
+  for (let i = 1; i <= 5; i++) {
+    const user = interaction.options.getMember(`joueur${i}`) || interaction.options.getUser(`joueur${i}`);
+    if (user) {
+      const id = user.id || user.user?.id;
+      if (id) joueurs.push(`<@${id}>`);
+    }
+  }
 
   if (joueurs.length < 2) {
     return interaction.reply({ content: '❌ Il faut au moins 2 joueurs !', ephemeral: true });
