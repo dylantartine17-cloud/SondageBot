@@ -23,7 +23,7 @@ const commands = [
          .setMaxValue(50))
     .toJSON(),
   new SlashCommandBuilder()
-    .setName('Roue')
+    .setName('roue')
     .setDescription('Tire au sort un joueur parmi une liste')
     .addUserOption(opt => opt.setName('joueur1').setDescription('Joueur 1').setRequired(true))
     .addUserOption(opt => opt.setName('joueur2').setDescription('Joueur 2').setRequired(true))
