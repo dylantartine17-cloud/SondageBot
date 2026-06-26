@@ -132,9 +132,16 @@ client.on('interactionCreate', async interaction => {
     await new Promise(r => setTimeout(r, 1500));
 
     const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
-    await interaction.editReply({
-      content: `🎉 **La roue s'arrête sur... ${gagnant} !** 🎉\n\n*Bonne chance pour la partie !*`
-    });
+    const messages = [
+  `🎉 **La roue s'arrête sur... ${gagnant} !** 🎉\n\n*Bonne chance pour la partie !*`,
+  `🎯 **${gagnant} est désigné(e) !** 🎯\n\n*Le destin a parlé !*`,
+  `👑 **${gagnant} est choisi(e) !** 👑\n\n*Montre ce que tu sais faire !*`,
+  `🔥 **C'est ${gagnant} !** 🔥\n\n*À toi de jouer !*`,
+  `⚡ **La roue a choisi ${gagnant} !** ⚡\n\n*Pas de pitié !*`,
+  `🎮 **${gagnant} est sélectionné(e) !** 🎮\n\n*GG à l'avance !*`,
+];
+const messageAleatoire = messages[Math.floor(Math.random() * messages.length)];
+await interaction.editReply({ content: messageAleatoire });
     return;
   }
 
