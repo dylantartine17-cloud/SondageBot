@@ -8,19 +8,14 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const sondages = new Map();
 
 const commands = [
-  new SlashCommandBuilder()
-    .setName('sondage')
-    .setDescription('Crée un sondage pour organiser une soirée gaming')
-    .addStringOption(opt =>
-      opt.setName('titre')
-         .setDescription('Question du sondage (ex: Du monde joue ce soir ?)')
-         .setRequired(true))
-    .addIntegerOption(opt =>
-      opt.setName('joueurs')
-         .setDescription('Nombre maximum de joueurs (ex: 5)')
-         .setRequired(true)
-         .setMinValue(1)
-         .setMaxValue(50))
+new SlashCommandBuilder()
+    .setName('roue')
+    .setDescription('Tire au sort un joueur parmi une liste')
+    .addUserOption(opt => opt.setName('joueur1').setDescription('Joueur 1').setRequired(true))
+    .addUserOption(opt => opt.setName('joueur2').setDescription('Joueur 2').setRequired(true))
+    .addUserOption(opt => opt.setName('joueur3').setDescription('Joueur 3').setRequired(false))
+    .addUserOption(opt => opt.setName('joueur4').setDescription('Joueur 4').setRequired(false))
+    .addUserOption(opt => opt.setName('joueur5').setDescription('Joueur 5').setRequired(false))
     .toJSON()
    ,
   new SlashCommandBuilder()
