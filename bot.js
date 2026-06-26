@@ -3,28 +3,33 @@ const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ActionRowB
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 const sondages = new Map();
 
 const commands = [
-new SlashCommandBuilder()
-    .setName('roue')
+  new SlashCommandBuilder()
+    .setName('sondage')
+    .setDescription('Crée un sondage pour organiser une soirée gaming')
+    .addStringOption(opt =>
+      opt.setName('titre')
+         .setDescription('Question du sondage (ex: Du monde joue ce soir ?)')
+         .setRequired(true))
+    .addIntegerOption(opt =>
+      opt.setName('joueurs')
+         .setDescription('Nombre maximum de joueurs (ex: 5)')
+         .setRequired(true)
+         .setMinValue(1)
+         .setMaxValue(50))
+    .toJSON(),
+  new SlashCommandBuilder()
+    .setName('tirage')
     .setDescription('Tire au sort un joueur parmi une liste')
     .addUserOption(opt => opt.setName('joueur1').setDescription('Joueur 1').setRequired(true))
     .addUserOption(opt => opt.setName('joueur2').setDescription('Joueur 2').setRequired(true))
     .addUserOption(opt => opt.setName('joueur3').setDescription('Joueur 3').setRequired(false))
     .addUserOption(opt => opt.setName('joueur4').setDescription('Joueur 4').setRequired(false))
     .addUserOption(opt => opt.setName('joueur5').setDescription('Joueur 5').setRequired(false))
-    .toJSON()
-   ,
-  new SlashCommandBuilder()
-    .setName('roue')
-    .setDescription('Tire au sort un joueur parmi une liste')
-    .addStringOption(opt =>
-      opt.setName('joueurs')
-         .setDescription('Pseudos séparés par des virgules (ex: Alice,Bob,Charlie)')
-         .setRequired(true))
     .toJSON()
 ];
 
@@ -33,7 +38,7 @@ client.once('clientReady', async () => {
   const rest = new REST({ version: '10' }).setToken(TOKEN);
   try {
     await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
-    console.log('✅ Commande /sondage enregistrée globalement');
+    console.log('✅ Commandes enregistrées globalement');
   } catch (err) {
     console.error('Erreur enregistrement commandes:', err);
   }
@@ -110,6 +115,29 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
+  if (interaction.isChatInputCommand() && interaction.commandName === 'tirage') {
+    const joueurs = [];
+    for (let i = 1; i <= 5; i++) {
+      const user = interaction.options.getUser(`joueur${i}`);
+      if (user) joueurs.push(`<@${user.id}>`);
+    }
+
+    if (joueurs.length < 2) {
+      return interaction.reply({ content: '❌ Il faut au moins 2 joueurs !', ephemeral: true });
+    }
+
+    await interaction.reply({ content: '🎰 La roue tourne...' });
+    await new Promise(r => setTimeout(r, 1500));
+    await interaction.editReply({ content: '🎰 La roue tourne... ⚡' });
+    await new Promise(r => setTimeout(r, 1500));
+
+    const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
+    await interaction.editReply({
+      content: `🎉 **La roue s'arrête sur... ${gagnant} !** 🎉\n\n*Bonne chance pour la partie !*`
+    });
+    return;
+  }
+
   if (!interaction.isButton()) return;
 
   const data = sondages.get(interaction.message.id);
@@ -144,35 +172,11 @@ client.on('interactionCreate', async interaction => {
     }
   }
 
-  await interaction.message.edit(buildSondage(data));
-});
-
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return;
-  if (interaction.commandName !== 'roue') return;
-
- const joueurs = [];
-  for (let i = 1; i <= 5; i++) {
-    const user = interaction.options.getMember(`joueur${i}`) || interaction.options.getUser(`joueur${i}`);
-    if (user) {
-      const id = user.id || user.user?.id;
-      if (id) joueurs.push(`<@${id}>`);
-    }
+  try {
+    await interaction.message.edit(buildSondage(data));
+  } catch (err) {
+    console.error('Erreur mise à jour:', err);
   }
-
-  if (joueurs.length < 2) {
-    return interaction.reply({ content: '❌ Il faut au moins 2 joueurs !', ephemeral: true });
-  }
-
-  await interaction.reply({ content: '🎰 La roue tourne...' });
-  await new Promise(r => setTimeout(r, 1500));
-  await interaction.editReply({ content: '🎰 La roue tourne... ⚡' });
-  await new Promise(r => setTimeout(r, 1500));
-
-  const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
-  await interaction.editReply({
-    content: `🎉 **La roue s'arrête sur... ${gagnant} !** 🎉\n\n*Bonne chance pour la partie !*`
-  });
 });
 
 client.login(TOKEN);
