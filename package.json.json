@@ -1,0 +1,12 @@
+{
+  "name": "discord-sondage-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord pour organiser des soirées gaming",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3"
+  }
+}
