@@ -22,6 +22,15 @@ const commands = [
          .setMinValue(1)
          .setMaxValue(50))
     .toJSON()
+   ,
+  new SlashCommandBuilder()
+    .setName('roue')
+    .setDescription('Tire au sort un joueur parmi une liste')
+    .addStringOption(opt =>
+      opt.setName('joueurs')
+         .setDescription('Pseudos séparés par des virgules (ex: Alice,Bob,Charlie)')
+         .setRequired(true))
+    .toJSON()
 ];
 
 client.once('ready', async () => {
@@ -141,6 +150,28 @@ client.on('interactionCreate', async interaction => {
   }
 
   await interaction.message.edit(buildSondage(data));
+});
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+  if (interaction.commandName !== 'roue') return;
+
+  const input = interaction.options.getString('joueurs');
+  const joueurs = input.split(',').map(j => j.trim()).filter(j => j.length > 0);
+
+  if (joueurs.length < 2) {
+    return interaction.reply({ content: '❌ Il faut au moins 2 joueurs !', ephemeral: true });
+  }
+
+  await interaction.reply({ content: '🎰 La roue tourne...' });
+  await new Promise(r => setTimeout(r, 1500));
+  await interaction.editReply({ content: '🎰 La roue tourne... ⚡' });
+  await new Promise(r => setTimeout(r, 1500));
+
+  const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
+  await interaction.editReply({
+    content: `🎉 **La roue s'arrête sur... ${gagnant} !** 🎉\n\n*Bonne chance pour la partie !*`
+  });
 });
 
 client.login(TOKEN);
