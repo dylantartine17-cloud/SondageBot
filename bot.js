@@ -151,8 +151,10 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName !== 'roue') return;
 
-  const input = interaction.options.getString('joueurs');
-  const joueurs = input.split(',').map(j => j.trim()).filter(j => j.length > 0);
+  const joueurs = ['joueur1','joueur2','joueur3','joueur4','joueur5']
+    .map(k => interaction.options.getUser(k))
+    .filter(u => u !== null)
+    .map(u => `<@${u.id}>`);
 
   if (joueurs.length < 2) {
     return interaction.reply({ content: '❌ Il faut au moins 2 joueurs !', ephemeral: true });
