@@ -28,7 +28,7 @@ new SlashCommandBuilder()
     .toJSON()
 ];
 
-client.once('ready', async () => {
+client.once('clientReady', async () => {
   console.log(`✅ Connecté en tant que ${client.user.tag}`);
   const rest = new REST({ version: '10' }).setToken(TOKEN);
   try {
