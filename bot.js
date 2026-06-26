@@ -23,7 +23,7 @@ const commands = [
          .setMaxValue(50))
     .toJSON(),
   new SlashCommandBuilder()
-    .setName('tirage')
+    .setName('Roue')
     .setDescription('Tire au sort un joueur parmi une liste')
     .addUserOption(opt => opt.setName('joueur1').setDescription('Joueur 1').setRequired(true))
     .addUserOption(opt => opt.setName('joueur2').setDescription('Joueur 2').setRequired(true))
@@ -115,7 +115,7 @@ client.on('interactionCreate', async interaction => {
     return;
   }
 
-  if (interaction.isChatInputCommand() && interaction.commandName === 'tirage') {
+  if (interaction.isChatInputCommand() && interaction.commandName === 'roue') {
     const joueurs = [];
     for (let i = 1; i <= 5; i++) {
       const user = interaction.options.getUser(`joueur${i}`);
