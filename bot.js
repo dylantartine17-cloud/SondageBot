@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -6,6 +6,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 const sondages = new Map();
+const roues = new Map();
 
 const commands = [
   new SlashCommandBuilder()
@@ -105,18 +106,48 @@ function promouvoir(data) {
   }
 }
 
+function getMessageRoue(gagnant) {
+  const messages = [
+   `🔪 **${gagnant} est désigné(e) !** 🔪\n\n*L'Entité a parlé... bonne chance pour survivre !*`,
+   `😈 **${gagnant} sera le Killer !** 😈\n\n*Montre leur qui est le vrai monstre dans cette partie !*`,
+   `💀 **L'Entité désigne ${gagnant} !** 💀\n\n*Personne ne sort vivant du Royaume de l'Entité !*` 
+   `👁️ **L'œil de l'Entité choisit ${gagnant} !** 👁️\n\n*Tu ne peux pas échapper à ton destin !*`,
+   `🔪 **${gagnant} joue le Tueur ce soir !** 🔪\n\n*L'Entité t'a choisi... les survivants ne savent pas encore ce qui les attend !*`,
+   `😤 **${gagnant} est le Killer !** 😤\n\n*4K ou rien, l'honneur du Killer est en jeu !*`,
+   `🩸 **${gagnant} part en Tueur !** 🩸\n\n*Tunnelle, campe, slug... fais ce qu'il faut !*`,
+   `🎯 **${gagnant} est choisi(e) !** 🎯\n\n*Ce soir tu es le prédateur, eux sont ta proie !*`,
+  ];
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
+function buildRoueButtons(msgId) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`roue_relancer_${msgId}`)
+      .setLabel('🔄 Relancer')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(`roue_annuler_${msgId}`)
+      .setLabel('❌ Annuler')
+      .setStyle(ButtonStyle.Danger)
+  );
+}
+
 client.on('interactionCreate', async interaction => {
+
+  // ── /sondage ───────────────────────────────────────────────
   if (interaction.isChatInputCommand() && interaction.commandName === 'sondage') {
     const titre = interaction.options.getString('titre');
     const max   = interaction.options.getInteger('joueurs');
     const data = { titre, max, participants: [], refus: [], attente: [] };
-const sondageData = buildSondage(data);
-sondageData.content = '@everyone 🎮 Un nouveau sondage vient d\'être créé !';
-const msg = await interaction.reply({ ...sondageData, fetchReply: true });
+    const sondageData = buildSondage(data);
+    sondageData.content = '@everyone 🎮 Un nouveau sondage vient d\'être créé !';
+    const msg = await interaction.reply({ ...sondageData, fetchReply: true });
     sondages.set(msg.id, data);
     return;
   }
 
+  // ── /roue ──────────────────────────────────────────────────
   if (interaction.isChatInputCommand() && interaction.commandName === 'roue') {
     const joueurs = [];
     for (let i = 1; i <= 5; i++) {
@@ -134,22 +165,86 @@ const msg = await interaction.reply({ ...sondageData, fetchReply: true });
     await new Promise(r => setTimeout(r, 1500));
 
     const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
-   const messages = [
-  `🔪 **${gagnant} est désigné(e) !** 🔪\n\n*L'Entité a parlé... bonne chance pour survivre !*`,
-`😈 **${gagnant} sera le Killer !** 😈\n\n*Montre leur qui est le vrai monstre dans cette partie !*`,
-     `💀 **L'Entité désigne ${gagnant} !** 💀\n\n*Personne ne sort vivant du Royaume de l'Entité !*`,
-       `👁️ **L'œil de l'Entité choisit ${gagnant} !** 👁️\n\n*Tu ne peux pas échapper à ton destin !*`,
-     `🎭 **${gagnant} est choisi(e) par l'Entité !** 🎭\n\n*Dead by Daylight... ou Dead by ${gagnant} ?*`,
-     `🔪 **${gagnant} joue le Tueur ce soir !** 🔪\n\n*L'Entité t'a choisi... les survivants ne savent pas encore ce qui les attend !*`,
-      `😤 **${gagnant} est le Killer !** 😤\n\n*4K ou rien, l'honneur du Killer est en jeu !*`,
-     `🩸 **${gagnant} part en Tueur !** 🩸\n\n*Tunnelle, campe, slug... fais ce qu'il faut !*`,
-     `🎯 **${gagnant} est choisi(e) !** 🎯\n\n*Ce soir tu es le prédateur, eux sont ta proie !*`,
-];
-const messageAleatoire = messages[Math.floor(Math.random() * messages.length)];
-await interaction.editReply({ content: messageAleatoire });
+    const reply = await interaction.fetchReply();
+    const msgId = reply.id;
+
+    roues.set(msgId, { joueurs });
+
+    await interaction.editReply({
+      content: getMessageRoue(gagnant),
+      components: [buildRoueButtons(msgId)]
+    });
+
+    // Après 5 minutes → remplace le message
+    setTimeout(async () => {
+      try {
+        if (roues.has(msgId)) {
+          await interaction.editReply({
+            content: '⏰ **Le tirage a expiré !** Que faire ?',
+            components: [buildRoueButtons(msgId)]
+          });
+        }
+      } catch (err) {}
+    }, 5 * 60 * 1000);
+
     return;
   }
 
+  // ── Boutons roue ───────────────────────────────────────────
+  if (interaction.isButton() && interaction.customId.startsWith('roue_')) {
+    const membre = interaction.member;
+    if (!membre.permissions.has(PermissionFlagsBits.Administrator)) {
+      return interaction.reply({ content: '❌ Seul un administrateur peut utiliser ces boutons !', ephemeral: true });
+    }
+
+    const parts = interaction.customId.split('_');
+    const action = parts[1];
+    const msgId = parts[2];
+    const data = roues.get(msgId);
+
+    if (!data) {
+      return interaction.reply({ content: '❌ Session expirée, relance une nouvelle /roue !', ephemeral: true });
+    }
+
+    if (action === 'annuler') {
+      roues.delete(msgId);
+      await interaction.update({ content: '❌ **Tirage annulé.**', components: [] });
+      setTimeout(async () => {
+        try { await interaction.deleteReply(); } catch (err) {}
+      }, 5000);
+      return;
+    }
+
+    if (action === 'relancer') {
+      await interaction.update({ content: '🎰 La roue tourne...', components: [] });
+      await new Promise(r => setTimeout(r, 1500));
+      await interaction.editReply({ content: '🎰 La roue tourne... ⚡' });
+      await new Promise(r => setTimeout(r, 1500));
+
+      const gagnant = data.joueurs[Math.floor(Math.random() * data.joueurs.length)];
+
+      await interaction.editReply({
+        content: getMessageRoue(gagnant),
+        components: [buildRoueButtons(msgId)]
+      });
+
+      // Remet le timer de 5 minutes
+      setTimeout(async () => {
+        try {
+          if (roues.has(msgId)) {
+            await interaction.editReply({
+              content: '⏰ **Le tirage a expiré !** Que faire ?',
+              components: [buildRoueButtons(msgId)]
+            });
+          }
+        } catch (err) {}
+      }, 5 * 60 * 1000);
+
+      return;
+    }
+  }
+
+  // ── Boutons sondage ────────────────────────────────────────
   if (!interaction.isButton()) return;
 
   const data = sondages.get(interaction.message.id);
