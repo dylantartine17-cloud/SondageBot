@@ -110,7 +110,7 @@ function getMessageRoue(gagnant) {
   const messages = [
    `🔪 **${gagnant} est désigné(e) !** 🔪\n\n*L'Entité a parlé... bonne chance pour survivre !*`,
    `😈 **${gagnant} sera le Killer !** 😈\n\n*Montre leur qui est le vrai monstre dans cette partie !*`,
-   `💀 **L'Entité désigne ${gagnant} !** 💀\n\n*Personne ne sort vivant du Royaume de l'Entité !*` 
+   `💀 **L'Entité désigne ${gagnant} !** 💀\n\n*Personne ne sort vivant du Royaume de l'Entité !*` ,
    `👁️ **L'œil de l'Entité choisit ${gagnant} !** 👁️\n\n*Tu ne peux pas échapper à ton destin !*`,
    `🔪 **${gagnant} joue le Tueur ce soir !** 🔪\n\n*L'Entité t'a choisi... les survivants ne savent pas encore ce qui les attend !*`,
    `😤 **${gagnant} est le Killer !** 😤\n\n*4K ou rien, l'honneur du Killer est en jeu !*`,
