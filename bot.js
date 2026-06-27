@@ -159,21 +159,20 @@ client.on('interactionCreate', async interaction => {
       return interaction.reply({ content: '❌ Il faut au moins 2 joueurs !', ephemeral: true });
     }
 
-    await interaction.reply({ content: '🎰 La roue tourne...' });
-    await new Promise(r => setTimeout(r, 1500));
-    await interaction.editReply({ content: '🎰 La roue tourne... ⚡' });
-    await new Promise(r => setTimeout(r, 1500));
+ const msg = await interaction.reply({ content: '🎰 La roue tourne...', fetchReply: true });
+const msgId = msg.id;
+roues.set(msgId, { joueurs });
 
-    const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
-    const reply = await interaction.fetchReply();
-    const msgId = reply.id;
+await new Promise(r => setTimeout(r, 1500));
+await interaction.editReply({ content: '🎰 La roue tourne... ⚡' });
+await new Promise(r => setTimeout(r, 1500));
 
-    roues.set(msgId, { joueurs });
+const gagnant = joueurs[Math.floor(Math.random() * joueurs.length)];
 
-    await interaction.editReply({
-      content: getMessageRoue(gagnant),
-      components: [buildRoueButtons(msgId)]
-    });
+await interaction.editReply({
+  content: getMessageRoue(gagnant),
+  components: [buildRoueButtons(msgId)]
+});
 
     // Après 5 minutes → remplace le message
     setTimeout(async () => {
